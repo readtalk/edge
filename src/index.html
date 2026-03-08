@@ -74,7 +74,10 @@ p:last-of-type {
   }
   
   #chatroom::before {
-    display: none;
+    display: block;
+    right: 0;  /* Tetap di kanan */
+    border-left: 1px solid #ccc;
+    border-right: none;
   }
 }
 
