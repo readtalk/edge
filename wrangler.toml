@@ -15,7 +15,7 @@ database_id = "25896737-e0e8-4561-8cc6-f5841430d1c8"
 
 [[kv_namespaces]]
 binding = "EDGE_KV"  # ← harus sama dengan "EDGE_KV"
-id = "uuid-dari-dashboard"
+id = "72b81feecbfc4a56b06d55f812e04e9d"
 
 [observability]
 enabled = false
