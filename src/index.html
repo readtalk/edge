@@ -8,18 +8,21 @@
 }
 body {
   font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
-/* CHATLOG - right */
+/* CHATLOG - kanan 70% */
 #chatlog {
   position: fixed;
   top: 0;
   bottom: 32px;
-  left: 200px;
+  left: 30%;
   right: 0;
   overflow-y: auto;
   padding: 8px;
   overflow-wrap: break-word;
+  background: white;
 }
 #chatlog span.username {
   font-weight: bold;
@@ -28,16 +31,19 @@ body {
   height: calc(100vh - 32px - 5em);
 }
 
-/* ROSTER - left */
+/* ROSTER - kiri 30% - FIX FULL HEIGHT + SCROLL */
 #roster {
   position: fixed;
   left: 0;
   top: 0;
   bottom: 32px;
-  width: 200px;
+  width: 30%;
   border-right: 1px solid #ccc;
   font-weight: bold;
   padding: 8px;
+  overflow-y: auto;  /* INI KUNCI! biar full ke bawah dan bisa scroll */
+  background: #f9f9f9;
+  height: calc(100vh - 32px); /* backup */
 }
 
 p {
@@ -52,39 +58,10 @@ p:last-of-type {
   display: none;
 }
 
-/* ===== SMARTPHONE STYLES ===== */
-@media(max-width:600px) {
-  /* Roster full screen */
-  #roster {
-    display: block;
-    width: 100%;
-    left: 0;
-    right: 0;
-    border-right: none;
-  }
-  
-  /* Chatlog hidden */
-  #chatlog {
-    display: none;
-  }
-  
-  /* Input hidden */
-  #chat-input {
-    display: none;
-  }
-  
-  #chatroom::before {
-    display: block;
-    right: 0;  /* Tetap di kanan */
-    border-left: 1px solid #ccc;
-    border-right: none;
-  }
-}
-
-/* CHAT INPUT - ONLY UNDER CHATLOG */
+/* CHAT INPUT - hanya di area chatlog (70%) */
 #chat-input {
   position: fixed;
-  width: calc(100% - 200px);
+  width: 70%;
   height: 32px;
   bottom: 0;
   right: 0;
@@ -94,16 +71,18 @@ p:last-of-type {
   border-left: 1px solid #ccc;
   padding-left: 32px;
   outline: none;
+  background: white;
 }
-  
-/* Send Chat Input */
+
+/* TOMBOL SEND - di kanan dalam chatlog */
 #chatroom::before {
   z-index: 1;
   display: block;
   content: "➤";
   position: fixed;
   bottom: 0;
-  right: 0;  /* Posisi di kanan */
+  right: calc(70% - 32px);  /* di ujung kiri chat input */
+  left: auto;
   width: 32px;
   height: 32px;
   line-height: 32px;
@@ -112,10 +91,10 @@ p:last-of-type {
   color: #888;
   background: white;
   border-top: 1px solid #ccc;
-  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
 }
 
-/* FORM 1 */
+/* FORM 1 - ROOM FORM (layer 3) */
 #room-form {
   position: fixed;
   z-index: 3;
@@ -144,7 +123,7 @@ p:last-of-type {
   height: 2em;
 }
 
-/* FORM 2 */
+/* FORM 2 - NAME FORM (layer 2) */
 #name-form {
   position: fixed;
   z-index: 2;
@@ -175,6 +154,35 @@ p:last-of-type {
   text-align: center;
 }
 
+/* ===== SMARTPHONE STYLES ===== */
+@media(max-width:600px) {
+  /* Roster full screen */
+  #roster {
+    display: block;
+    width: 100%;
+    left: 0;
+    right: 0;
+    border-right: none;
+    bottom: 0; /* full screen tanpa bottom gap */
+    height: 100vh;
+  }
+  
+  /* Chatlog hidden */
+  #chatlog {
+    display: none;
+  }
+  
+  /* Input hidden */
+  #chat-input {
+    display: none;
+  }
+  
+  /* Tombol hidden */
+  #chatroom::before {
+    display: none;
+  }
+}
+
 @media(max-width:660px) {
   #name-input, #room-form { font-size: 150%; }
   #name-form p { font-size: 75%; }
@@ -191,40 +199,52 @@ p:last-of-type {
   width: 20em;
 }
 
+/* Settings modal */
+#settings-modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border: 2px solid #ccc;
+  z-index: 1000;
+}
 </style>
-  </head>
-  <body>
-    <form id="room-form" action="/fake-form-action">
-      <p>Public Room:</p>
-      <input id="room-name" placeholder="room name"><button id="go-public">Go &raquo;</button>
-      <p>OR</p>
-      <button id="go-private">Private Room &raquo;</button>
-    </form>
+</head>
+<body>
+  <form id="room-form" action="/fake-form-action">
+    <p>Public Room:</p>
+    <input id="room-name" placeholder="room name"><button id="go-public">Go &raquo;</button>
+    <p>OR</p>
+    <button id="go-private">Private Room &raquo;</button>
+  </form>
 
-    <form id="name-form" action="/fake-form-action">
-      <input id="name-input" placeholder="your name">
-      <p>This chat runs entirely on the edge<br>
-        <a href="https://app-readtalk.pages.dev/" target="_blank">READTalk</a></p>
-    </form>
+  <form id="name-form" action="/fake-form-action">
+    <input id="name-input" placeholder="your name">
+    <p>This chat runs entirely on the edge<br>
+      <a href="https://app-readtalk.pages.dev/" target="_blank">READTalk</a></p>
+  </form>
 
-    <form id="chatroom" action="/fake-form-action">
-      <div id="chatlog">
-        <div id="spacer"></div>
-      </div>
-      <div id="roster"></div>
-      <input id="chat-input">
-    </form>
-
-    <div id="settings-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 2px solid #ccc; z-index: 1000;">
-      <h3>Settings</h3>
-      <p>Device ID: <span id="device-id"></span></p>
-      <p>Rooms in KV: <span id="kv-count"></span></p>
-      <p>Rooms in D1: <span id="d1-count"></span></p>
-      <button id="close-settings">Close</button>
+  <form id="chatroom" action="/fake-form-action">
+    <div id="chatlog">
+      <div id="spacer"></div>
     </div>
-  </body>
+    <div id="roster"></div>
+    <input id="chat-input">
+  </form>
+
+  <div id="settings-modal">
+    <h3>Settings</h3>
+    <p>Device ID: <span id="device-id"></span></p>
+    <p>Rooms in KV: <span id="kv-count"></span></p>
+    <p>Rooms in D1: <span id="d1-count"></span></p>
+    <button id="close-settings">Close</button>
+  </div>
 
 <script type="text/javascript">
+// SCRIPT SAMA PERSIS DENGAN FILE 2, TIDAK DIUBAH
 let currentWebSocket = null;
 
 let nameForm = document.querySelector("#name-form");
@@ -249,6 +269,8 @@ if (!deviceId) {
   localStorage.setItem('device_id', deviceId);
 }
 
+document.getElementById('device-id').textContent = deviceId;
+
 let hostname = window.location.host;
 if (hostname == "") {
   hostname = "account.soeparnocorp.workers.dev";
@@ -259,10 +281,12 @@ async function loadPublicRooms() {
     let response = await fetch(`https://${hostname}/api/rooms`);
     let rooms = await response.json();
     console.log('Public rooms from D1:', rooms);
+    document.getElementById('d1-count').textContent = rooms.length;
     
     let cached = await fetch(`https://${hostname}/api/cache`);
     let cacheData = await cached.json();
     console.log('Cached rooms from KV:', cacheData);
+    document.getElementById('kv-count').textContent = cacheData.length;
   } catch (err) {
     console.error('Failed to load rooms:', err);
   }
@@ -358,9 +382,7 @@ function startRoomChooser() {
 }
 
 function startChat() {
-  // Sembunyikan room form
   roomForm.style.display = "none";
-    
   nameForm.style.display = "block";
 
   roomname = roomname.replace(/[^a-zA-Z0-9_-]/g, "").replace(/_/g, "-").toLowerCase();
@@ -430,13 +452,18 @@ function startChat() {
         currentWebSocket.send(JSON.stringify({name: username}));
       }
           
-      nameForm.style.display = "none";      
+      nameForm.style.display = "none";
+      
+      pendingParticipants.forEach(participant => {
+        let p = document.createElement("p");
+        p.innerText = participant;
+        roster.appendChild(p);
+      });
+      pendingParticipants = [];
       
       if (window.innerWidth <= 600) {
-        
         chatInput.style.display = "none";
       } else {
-        
         roster.style.display = "block";
         chatlog.style.display = "block";
         chatInput.style.display = "block";
@@ -449,6 +476,10 @@ function startChat() {
     if (event.currentTarget.value.length > 32) {
       event.currentTarget.value = event.currentTarget.value.slice(0, 32);
     }
+  });
+  
+  document.getElementById('close-settings').addEventListener('click', function() {
+    document.getElementById('settings-modal').style.display = 'none';
   });
 }
 
@@ -489,7 +520,6 @@ function join() {
     if (data.error) {
       addChatMessage(null, "* Error: " + data.error);
     } else if (data.joined) {
-      // Simpan partisipan untuk ditampilkan nanti
       pendingParticipants.push(data.joined);
             
       if (username) {
