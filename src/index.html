@@ -92,20 +92,24 @@ p:last-of-type {
   padding-left: 32px;
   outline: none;
 }
+/* Send Right Chatlog */
 #chatroom::before {
   z-index: 1;
   display: block;
   content: ">";
   position: fixed;
   bottom: 0;
-  left: 0;
+  right: calc(100% - 200px - 32px); /* Pindah ke kanan */
+  left: auto;
   width: 32px;
   height: 32px;
   line-height: 32px;
   text-align: center;
   font-weight: bold;
   color: #888;
-  -webkit-text-stroke-width: 2px;
+  background: white;
+  border-top: 1px solid #ccc;
+  border-right: 1px solid #ccc;
 }
 
 /* FORM 1 */
