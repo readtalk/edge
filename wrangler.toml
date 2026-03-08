@@ -8,13 +8,18 @@ bindings = [
   { name = "rooms", class_name = "ChatRoom" },
   { name = "limiters", class_name = "RateLimiter" },
 ]
+[observability]
+[observability.logs]
+enabled = false
+invocation_logs = true
+
 
 [[rules]]
 type = "Data"
 globs = ["**/*.html"]
 fallthrough = false
 
-# Indicate that you want the ChatRoom and RateLimiter classes to be callable as Durable Objects.
+
 [[migrations]]
-tag = "v1"                                       # Should be unique for each entry
+tag = "v1"                                       
 new_sqlite_classes = ["ChatRoom", "RateLimiter"]
