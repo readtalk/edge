@@ -92,14 +92,15 @@ p:last-of-type {
   padding-left: 32px;
   outline: none;
 }
+  
+/* Send Chat Input */
 #chatroom::before {
   z-index: 1;
   display: block;
-  content: ">";
+  content: "➤";
   position: fixed;
   bottom: 0;
-  right: calc(100% - 200px - 32px);
-  left: auto;
+  right: 0;  /* Posisi di kanan */
   width: 32px;
   height: 32px;
   line-height: 32px;
@@ -108,7 +109,7 @@ p:last-of-type {
   color: #888;
   background: white;
   border-top: 1px solid #ccc;
-  border-right: 1px solid #ccc;
+  border-left: 1px solid #ccc;
 }
 
 /* FORM 1 */
