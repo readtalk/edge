@@ -8,6 +8,15 @@ bindings = [
   { name = "rooms", class_name = "ChatRoom" },
   { name = "limiters", class_name = "RateLimiter" },
 ]
+[[d1_databases]]
+binding = "EDGE_DB"  # ← harus sama dengan "EDGE_DB"
+database_name = "app-readtalk"
+database_id = "uuid-dari-dashboard"
+
+[[kv_namespaces]]
+binding = "EDGE_KV"  # ← harus sama dengan "EDGE_KV"
+id = "uuid-dari-dashboard"
+
 [observability]
 enabled = false
 head_sampling_rate = 1
