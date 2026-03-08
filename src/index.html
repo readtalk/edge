@@ -10,13 +10,12 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* CHATLOG - di KANAN */
 #chatlog {
   position: fixed;
   top: 0;
   bottom: 32px;
-  left: 200px;
-  right: 0;
+  left: 0;
+  right: 200px;
   overflow-y: auto;
   padding: 8px;
   overflow-wrap: break-word;
@@ -28,14 +27,7 @@ body {
   height: calc(100vh - 32px - 5em);
 }
 
-/* ROSTER - di KIRI */
 #roster {
-  position: fixed;
-  left: 0;
-  top: 0;
-  bottom: 32px;
-  width: 200px;
-  border-right: 1px solid #ccc;
   font-weight: bold;
   padding: 8px;
 }
@@ -48,34 +40,22 @@ p:last-of-type {
   margin: 0;
 }
 
+#roster {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 32px;
+  width: 200px;
+  border-left: none;
+}
+
 ::-webkit-scrollbar {
   display: none;
 }
 
-/* ===== SMARTPHONE STYLES ===== */
 @media(max-width:600px) {
-  /* Roster full screen */
-  #roster {
-    display: block;
-    width: 100%;
-    left: 0;
-    right: 0;
-    border-right: none;
-  }
-  
-  /* Chatlog hidden */
-  #chatlog {
-    display: none;
-  }
-  
-  /* Input hidden */
-  #chat-input {
-    display: none;
-  }
-  
-  #chatroom::before {
-    display: none;
-  }
+  #roster { display: none; }
+  #chatlog { right: 0; }
 }
 
 #chat-input {
@@ -105,10 +85,38 @@ p:last-of-type {
   -webkit-text-stroke-width: 2px;
 }
 
-/* FORM 1 - ROOM FORM (sekarang tampil pertama) */
-#room-form {
+#name-form {
   position: fixed;
   z-index: 3;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+}
+
+#name-input {
+  position: fixed;
+  font-size: 200%;
+  top: calc(50% - 1em);
+  left: calc(50% - 8em);
+  width: 16em;
+  height: 2em;
+  margin: 0;
+  text-align: center;
+  border: 1px solid #bbb;
+}
+
+#name-form p {
+  position: fixed;
+  top: calc(50% + 3em);
+  width: 100%;
+  text-align: center;
+}
+
+#room-form {
+  position: fixed;
+  z-index: 2;
   top: 0;
   bottom: 0;
   left: 0;
@@ -134,37 +142,6 @@ p:last-of-type {
   height: 2em;
 }
 
-/* FORM 2 - NAME FORM (tampil setelah room dipilih) */
-#name-form {
-  position: fixed;
-  z-index: 2;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: white;
-  display: none;
-}
-
-#name-input {
-  position: fixed;
-  font-size: 200%;
-  top: calc(50% - 1em);
-  left: calc(50% - 8em);
-  width: 16em;
-  height: 2em;
-  margin: 0;
-  text-align: center;
-  border: 1px solid #bbb;
-}
-
-#name-form p {
-  position: fixed;
-  top: calc(50% + 3em);
-  width: 100%;
-  text-align: center;
-}
-
 @media(max-width:660px) {
   #name-input, #room-form { font-size: 150%; }
   #name-form p { font-size: 75%; }
@@ -184,21 +161,17 @@ p:last-of-type {
 </style>
   </head>
   <body>
-    <!-- FORM 1 - ROOM FORM (tampil pertama) -->
+    <form id="name-form" action="/fake-form-action">
+      <input id="name-input" placeholder="your name">
+      <p>This chat runs entirely on the edge<br>
+        <a href="https://blog.cloudflare.com/introducing-workers-durable-objects" target="_blank">Durable Objects</a></p>
+    </form>
     <form id="room-form" action="/fake-form-action">
       <p>Public Room:</p>
       <input id="room-name" placeholder="room name"><button id="go-public">Go &raquo;</button>
       <p>OR</p>
       <button id="go-private">Private Room &raquo;</button>
     </form>
-
-    <!-- FORM 2 - NAME FORM (tampil setelah room dipilih) -->
-    <form id="name-form" action="/fake-form-action">
-      <input id="name-input" placeholder="your name">
-      <p>This chat runs entirely on the edge<br>
-        <a href="https://blog.cloudflare.com/introducing-workers-durable-objects" target="_blank">Durable Objects</a></p>
-    </form>
-
     <form id="chatroom" action="/fake-form-action">
       <div id="chatlog">
         <div id="spacer"></div>
@@ -234,7 +207,6 @@ let isAtBottom = true;
 let username;
 let roomname;
 let deviceId = localStorage.getItem('device_id');
-let pendingParticipants = []; // Untuk nyimpen partisipan sementara
 
 if (!deviceId) {
   deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
@@ -295,8 +267,28 @@ async function cachePublicRooms() {
   }
 }
 
-// START dengan ROOM FORM
+function startNameChooser() {
+  nameForm.addEventListener("submit", event => {
+    event.preventDefault();
+    username = nameInput.value;
+    if (username.length > 0) {
+      localStorage.setItem('username', username);
+      startRoomChooser();
+    }
+  });
+
+  nameInput.addEventListener("input", event => {
+    if (event.currentTarget.value.length > 32) {
+      event.currentTarget.value = event.currentTarget.value.slice(0, 32);
+    }
+  });
+
+  nameInput.focus();
+}
+
 function startRoomChooser() {
+  nameForm.remove();
+
   if (document.location.hash.length > 1) {
     roomname = document.location.hash.slice(1);
     saveRoomToD1(roomname, false);
@@ -351,11 +343,7 @@ function startRoomChooser() {
 }
 
 function startChat() {
-  // Sembunyikan room form
-  roomForm.style.display = "none";
-  
-  // Tampilkan name form
-  nameForm.style.display = "block";
+  roomForm.remove();
 
   roomname = roomname.replace(/[^a-zA-Z0-9_-]/g, "").replace(/_/g, "-").toLowerCase();
 
@@ -365,13 +353,6 @@ function startChat() {
   }
 
   document.location.hash = "#" + roomname;
-
-  // Set default untuk smartphone: roster tampil, chatlog & input hidden
-  if (window.innerWidth <= 600) {
-    roster.style.display = "block";
-    chatlog.style.display = "none";
-    chatInput.style.display = "none";
-  }
 
   chatInput.addEventListener("keydown", event => {
     if (event.keyCode == 38) {
@@ -405,6 +386,13 @@ function startChat() {
     isAtBottom = chatlog.scrollTop + chatlog.clientHeight >= chatlog.scrollHeight;
   });
 
+  chatInput.focus();
+  document.body.addEventListener("click", event => {
+    if (window.getSelection().toString() == "") {
+      chatInput.focus();
+    }
+  });
+
   if('visualViewport' in window) {
     window.visualViewport.addEventListener('resize', function(event) {
       if (isAtBottom) {
@@ -413,43 +401,7 @@ function startChat() {
     });
   }
 
-  // JOIN - WebSocket NYALA sebelum user isi nama
   join();
-
-  // Setelah WebSocket nyala, baru handle name form
-  nameForm.addEventListener("submit", event => {
-    event.preventDefault();
-    username = nameInput.value;
-    if (username.length > 0) {
-      localStorage.setItem('username', username);
-      
-      // Kirim nama ke WebSocket
-      if (currentWebSocket) {
-        currentWebSocket.send(JSON.stringify({name: username}));
-      }
-      
-      // Sembunyikan name form
-      nameForm.style.display = "none";
-      
-      // Tampilkan roster/chat sesuai mode
-      if (window.innerWidth <= 600) {
-        // Di smartphone, roster sudah tampil
-        chatInput.style.display = "none"; // tetap hidden
-      } else {
-        // Di desktop, tampilkan semua
-        roster.style.display = "block";
-        chatlog.style.display = "block";
-        chatInput.style.display = "block";
-        chatInput.focus();
-      }
-    }
-  });
-
-  nameInput.addEventListener("input", event => {
-    if (event.currentTarget.value.length > 32) {
-      event.currentTarget.value = event.currentTarget.value.slice(0, 32);
-    }
-  });
 }
 
 let lastSeenTimestamp = 0;
@@ -481,7 +433,7 @@ function join() {
 
   ws.addEventListener("open", event => {
     currentWebSocket = ws;
-    // Jangan kirim name dulu, nanti setelah form nama di-submit
+    ws.send(JSON.stringify({name: username}));
   });
 
   ws.addEventListener("message", event => {
@@ -490,15 +442,9 @@ function join() {
     if (data.error) {
       addChatMessage(null, "* Error: " + data.error);
     } else if (data.joined) {
-      // Simpan partisipan untuk ditampilkan nanti
-      pendingParticipants.push(data.joined);
-      
-      // Kalau roster sudah ditampilkan (user sudah isi nama), langsung append
-      if (username) {
-        let p = document.createElement("p");
-        p.innerText = data.joined;
-        roster.appendChild(p);
-      }
+      let p = document.createElement("p");
+      p.innerText = data.joined;
+      roster.appendChild(p);
     } else if (data.quit) {
       for (let child of roster.childNodes) {
         if (child.innerText == data.quit) {
@@ -552,6 +498,6 @@ function addChatMessage(name, text) {
 }
 
 loadPublicRooms();
-startRoomChooser(); // Mulai dengan room form
+startNameChooser();
 </script>
 </html>
