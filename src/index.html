@@ -78,28 +78,27 @@ p:last-of-type {
   }
 }
 
-/* Text Area Chat */
+/* CHAT INPUT - ONLY UNDER CHATLOG */
 #chat-input {
   position: fixed;
-  width: calc(100% - 200px); /* Hanya selebar chatlog */
+  width: calc(100% - 200px);
   height: 32px;
   bottom: 0;
-  right: 0; /* Nempel kanan */
-  left: auto; /* Lepas dari kiri */
+  right: 0;
+  left: auto;
   border: none;
   border-top: 1px solid #ccc;
-  border-left: 1px solid #ccc; /* Biar keliatan batasnya */
+  border-left: 1px solid #ccc;
   padding-left: 32px;
   outline: none;
 }
-/* Send Right Chatlog */
 #chatroom::before {
   z-index: 1;
   display: block;
-  content: "➤";
+  content: ">";
   position: fixed;
   bottom: 0;
-  right: calc(100% - 200px - 32px); /* Pindah ke kanan */
+  right: calc(100% - 200px - 32px);
   left: auto;
   width: 32px;
   height: 32px;
