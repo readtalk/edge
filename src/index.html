@@ -8,15 +8,13 @@
 }
 body {
   font-family: Arial, Helvetica, sans-serif;
-  margin: 0;
-  padding: 0;
 }
 
 /* CHATLOG - right */
 #chatlog {
   position: fixed;
   top: 0;
-  bottom: 60px;
+  bottom: 32px;
   left: 200px;
   right: 0;
   overflow-y: auto;
@@ -27,7 +25,7 @@ body {
   font-weight: bold;
 }
 #spacer {
-  height: calc(100vh - 60px - 5em);
+  height: calc(100vh - 32px - 5em);
 }
 
 /* ROSTER - left */
@@ -35,13 +33,11 @@ body {
   position: fixed;
   left: 0;
   top: 0;
-  bottom: 60px;
+  bottom: 32px;
   width: 200px;
   border-right: 1px solid #ccc;
   font-weight: bold;
   padding: 8px;
-  overflow-y: auto;
-  background: #f9f9f9;
 }
 
 p {
@@ -56,50 +52,60 @@ p:last-of-type {
   display: none;
 }
 
-/* CHAT INPUT - modern dengan tombol di kanan */
-.chat-input-container {
-  position: fixed;
-  bottom: 10px;
-  right: 20px;
-  width: calc(100% - 200px - 40px);
-  display: flex;
-  gap: 8px;
-  z-index: 1000;
+/* ===== SMARTPHONE STYLES ===== */
+@media(max-width:600px) {
+  /* Roster full screen */
+  #roster {
+    display: block;
+    width: 100%;
+    left: 0;
+    right: 0;
+    border-right: none;
+  }
+  
+  /* Chatlog hidden */
+  #chatlog {
+    display: none;
+  }
+  
+  /* Input hidden */
+  #chat-input {
+    display: none;
+  }
+  
+  #chatroom::before {
+    display: none;
+  }
 }
 
 #chat-input {
-  flex: 1;
-  height: 40px;
-  border: 1px solid #ddd;
-  border-radius: 24px;
-  padding: 0 16px;
-  outline: none;
-  font-size: 14px;
-  background: white;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-#send-button {
-  width: 40px;
-  height: 40px;
+  position: fixed;
+  width: 100%;
+  height: 32px;
+  bottom: 0;
+  left: 0;
   border: none;
-  background: #007bff;
-  color: white;
-  border-radius: 50%;
-  font-size: 18px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0,123,255,0.3);
-  transition: background 0.2s;
+  border-top: none;
+  padding-left: 32px;
+  outline: none;
+}
+#chatroom::before {
+  z-index: 1;
+  display: block;
+  content: ">";
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  text-align: center;
+  font-weight: bold;
+  color: #888;
+  -webkit-text-stroke-width: 2px;
 }
 
-#send-button:hover {
-  background: #0056b3;
-}
-
-/* FORM 1 - ROOM FORM (layer 3) */
+/* FORM 1 */
 #room-form {
   position: fixed;
   z-index: 3;
@@ -128,7 +134,7 @@ p:last-of-type {
   height: 2em;
 }
 
-/* FORM 2 - NAME FORM (layer 2) */
+/* FORM 2 */
 #name-form {
   position: fixed;
   z-index: 2;
@@ -175,64 +181,11 @@ p:last-of-type {
   width: 20em;
 }
 
-/* ===== SMARTPHONE STYLES ===== */
-@media(max-width:600px) {
-  /* Roster full screen */
-  #roster {
-    width: 100%;
-    bottom: 0;
-    border-right: none;
-  }
-  
-  /* Chatlog hidden initially */
-  #chatlog {
-    display: none;
-  }
-  
-  /* Chat input container hidden initially */
-  .chat-input-container {
-    display: none;
-  }
-  
-  /* When chat is active (after name submit) */
-  body.chat-active #roster {
-    display: none;
-  }
-  
-  body.chat-active #chatlog {
-    display: block;
-    left: 0;
-    width: 100%;
-    bottom: 70px;
-  }
-  
-  body.chat-active .chat-input-container {
-    display: flex;
-    width: calc(100% - 20px);
-    right: 10px;
-    bottom: 10px;
-  }
-}
-
-/* Settings modal */
-#settings-modal {
-  display: none;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 20px;
-  border: 2px solid #ccc;
-  z-index: 1000;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-  border-radius: 8px;
-}
 </style>
-</head>
-<body>
-  <form id="room-form" action="/fake-form-action">
-    <p>Public Room:</p>
+  </head>
+  <body>
+    <form id="room-form" action="/fake-form-action">
+      <p>Public Room:</p>
       <input id="room-name" placeholder="room name"><button id="go-public">Go &raquo;</button>
       <p>OR</p>
       <button id="go-private">Private Room &raquo;</button>
@@ -249,19 +202,17 @@ p:last-of-type {
         <div id="spacer"></div>
       </div>
       <div id="roster"></div>
-      <div class="chat-input-container">
-        <input id="chat-input" placeholder="Type a message...">
-        <button id="send-button">➤</button>
-      </div>
+      <input id="chat-input">
     </form>
 
-    <div id="settings-modal">
+    <div id="settings-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 2px solid #ccc; z-index: 1000;">
       <h3>Settings</h3>
       <p>Device ID: <span id="device-id"></span></p>
       <p>Rooms in KV: <span id="kv-count"></span></p>
       <p>Rooms in D1: <span id="d1-count"></span></p>
       <button id="close-settings">Close</button>
     </div>
+  </body>
 
 <script type="text/javascript">
 let currentWebSocket = null;
@@ -275,7 +226,6 @@ let goPrivateButton = document.querySelector("#go-private");
 let chatroom = document.querySelector("#chatroom");
 let chatlog = document.querySelector("#chatlog");
 let chatInput = document.querySelector("#chat-input");
-let sendButton = document.querySelector("#send-button");
 let roster = document.querySelector("#roster");
 
 let isAtBottom = true;
@@ -289,9 +239,6 @@ if (!deviceId) {
   localStorage.setItem('device_id', deviceId);
 }
 
-// Display device ID in modal
-document.getElementById('device-id').textContent = deviceId;
-
 let hostname = window.location.host;
 if (hostname == "") {
   hostname = "account.soeparnocorp.workers.dev";
@@ -302,12 +249,10 @@ async function loadPublicRooms() {
     let response = await fetch(`https://${hostname}/api/rooms`);
     let rooms = await response.json();
     console.log('Public rooms from D1:', rooms);
-    document.getElementById('d1-count').textContent = rooms.length;
     
     let cached = await fetch(`https://${hostname}/api/cache`);
     let cacheData = await cached.json();
     console.log('Cached rooms from KV:', cacheData);
-    document.getElementById('kv-count').textContent = cacheData.length;
   } catch (err) {
     console.error('Failed to load rooms:', err);
   }
@@ -403,8 +348,9 @@ function startRoomChooser() {
 }
 
 function startChat() {
-  // Hide room form, show name form
+  // Sembunyikan room form
   roomForm.style.display = "none";
+    
   nameForm.style.display = "block";
 
   roomname = roomname.replace(/[^a-zA-Z0-9_-]/g, "").replace(/_/g, "-").toLowerCase();
@@ -416,14 +362,12 @@ function startChat() {
 
   document.location.hash = "#" + roomname;
 
-  // Initial mobile view: roster only
   if (window.innerWidth <= 600) {
-    document.body.classList.remove('chat-active');
     roster.style.display = "block";
     chatlog.style.display = "none";
+    chatInput.style.display = "none";
   }
 
-  // Send message on Enter key
   chatInput.addEventListener("keydown", event => {
     if (event.keyCode == 38) {
       chatlog.scrollBy(0, -50);
@@ -433,20 +377,17 @@ function startChat() {
       chatlog.scrollBy(0, -chatlog.clientHeight + 50);
     } else if (event.keyCode == 34) {
       chatlog.scrollBy(0, chatlog.clientHeight - 50);
-    } else if (event.keyCode == 13 && !event.shiftKey) {
-      event.preventDefault();
-      sendMessage();
     }
-  });
-
-  // Send message on button click
-  sendButton.addEventListener("click", function() {
-    sendMessage();
   });
 
   chatroom.addEventListener("submit", event => {
     event.preventDefault();
-    sendMessage();
+
+    if (currentWebSocket) {
+      currentWebSocket.send(JSON.stringify({message: chatInput.value}));
+      chatInput.value = "";
+      chatlog.scrollBy(0, 1e8);
+    }
   });
 
   chatInput.addEventListener("input", event => {
@@ -479,22 +420,16 @@ function startChat() {
         currentWebSocket.send(JSON.stringify({name: username}));
       }
           
-      nameForm.style.display = "none";
-      
-      // Show pending participants
-      pendingParticipants.forEach(participant => {
-        let p = document.createElement("p");
-        p.innerText = participant;
-        roster.appendChild(p);
-      });
-      pendingParticipants = [];
+      nameForm.style.display = "none";      
       
       if (window.innerWidth <= 600) {
-        // Mobile: switch to chat mode
-        document.body.classList.add('chat-active');
-        chatInput.focus();
+        
+        chatInput.style.display = "none";
       } else {
-        // Desktop: show chat input
+        
+        roster.style.display = "block";
+        chatlog.style.display = "block";
+        chatInput.style.display = "block";
         chatInput.focus();
       }
     }
@@ -505,19 +440,6 @@ function startChat() {
       event.currentTarget.value = event.currentTarget.value.slice(0, 32);
     }
   });
-  
-  // Settings modal close
-  document.getElementById('close-settings').addEventListener('click', function() {
-    document.getElementById('settings-modal').style.display = 'none';
-  });
-}
-
-function sendMessage() {
-  if (currentWebSocket && chatInput.value.trim() !== '') {
-    currentWebSocket.send(JSON.stringify({message: chatInput.value}));
-    chatInput.value = "";
-    chatlog.scrollBy(0, 1e8);
-  }
 }
 
 let lastSeenTimestamp = 0;
@@ -557,7 +479,7 @@ function join() {
     if (data.error) {
       addChatMessage(null, "* Error: " + data.error);
     } else if (data.joined) {
-      // Save participants to show after name is set
+      // Simpan partisipan untuk ditampilkan nanti
       pendingParticipants.push(data.joined);
             
       if (username) {
@@ -617,7 +539,6 @@ function addChatMessage(name, text) {
   }
 }
 
-// Initialize
 loadPublicRooms();
 startRoomChooser();
 </script>
