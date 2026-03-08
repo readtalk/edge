@@ -225,7 +225,7 @@ p:last-of-type {
   <form id="name-form" action="/fake-form-action">
     <input id="name-input" placeholder="your name">
     <p>This chat runs entirely on the edge<br>
-      <a href="https://app-readtalk.pages.dev/" target="_blank">READTalk</a></p>
+      <a href="https://app-readtalk.pages.dev/" target="_blank">READTalk App</a></p>
   </form>
 
   <form id="chatroom" action="/fake-form-action">
@@ -274,7 +274,7 @@ document.getElementById('device-id').textContent = deviceId;
 
 let hostname = window.location.host;
 if (hostname == "") {
-  hostname = "account.soeparnocorp.workers.dev";
+  hostname = "edge.app-readtalk.workers.dev";
 }
 
 async function loadPublicRooms() {
