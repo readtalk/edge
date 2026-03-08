@@ -11,7 +11,7 @@ bindings = [
 [[d1_databases]]
 binding = "EDGE_DB"  # ← harus sama dengan "EDGE_DB"
 database_name = "app-readtalk"
-database_id = "uuid-dari-dashboard"
+database_id = "25896737-e0e8-4561-8cc6-f5841430d1c8"
 
 [[kv_namespaces]]
 binding = "EDGE_KV"  # ← harus sama dengan "EDGE_KV"
