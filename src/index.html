@@ -57,28 +57,32 @@ p:last-of-type {
   display: none;
 }
 
-/* CHAT INPUT - always at bottom */
+/* CHAT INPUT - only under chatlog, not under roster */
 #chat-input {
   position: fixed;
-  width: 100%;
+  width: calc(100% - 200px); /* hanya selebar chatlog */
   height: 32px;
   bottom: 0;
-  left: 0;
+  right: 0; /* anchor ke kanan */
+  left: auto; /* biar tidak dari kiri */
   border: none;
   border-top: 1px solid #ccc;
+  border-left: 1px solid #ccc;
   padding-left: 32px;
   outline: none;
   background: white;
   z-index: 1000;
 }
 
+/* Simbol ">" pindah ke dalam area chat input */
 #chatroom::before {
   z-index: 1001;
   display: block;
   content: ">";
   position: fixed;
   bottom: 0;
-  left: 0;
+  right: calc(100% - 200px - 32px); /* di dalam area chatlog */
+  left: auto;
   width: 32px;
   height: 32px;
   line-height: 32px;
@@ -88,6 +92,7 @@ p:last-of-type {
   background: white;
   border-top: 1px solid #ccc;
   border-right: 1px solid #ccc;
+  border-left: none;
 }
 
 /* ROOM FORM - first screen */
@@ -176,6 +181,9 @@ p:last-of-type {
   
   #chat-input {
     display: none; /* hidden initially */
+    width: 100%; /* di mobile, full width */
+    left: 0;
+    right: 0;
   }
   
   #chatroom::before {
@@ -197,11 +205,17 @@ p:last-of-type {
   
   body.chat-active #chat-input {
     display: block;
+    width: 100%;
+    left: 0;
+    right: 0;
     z-index: 21;
+    border-left: none;
   }
   
   body.chat-active #chatroom::before {
     display: block;
+    left: 0;
+    right: auto;
     z-index: 22;
   }
 }
