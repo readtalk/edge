@@ -78,14 +78,17 @@ p:last-of-type {
   }
 }
 
+/* Text Area Chat */
 #chat-input {
   position: fixed;
-  width: 100%;
+  width: calc(100% - 200px); /* Hanya selebar chatlog */
   height: 32px;
   bottom: 0;
-  left: 0;
+  right: 0; /* Nempel kanan */
+  left: auto; /* Lepas dari kiri */
   border: none;
-  border-top: none;
+  border-top: 1px solid #ccc;
+  border-left: 1px solid #ccc; /* Biar keliatan batasnya */
   padding-left: 32px;
   outline: none;
 }
