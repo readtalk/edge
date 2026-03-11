@@ -1,5 +1,3 @@
-// This is the Edge Chat Demo Worker, built using Durable Objects!
-
 // ===============================
 // Introduction to Modules
 // ===============================
