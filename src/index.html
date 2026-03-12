@@ -1,28 +1,35 @@
 <!DOCTYPE html>
+<!--
+  THIS IS NOT THE INTERESTING FILE
+
+  This is just some UI code. There's nothing interesting and unique in this file. The interesting
+  thing about this demo is the server side, which is in chat.mjs.
+
+  WARNING: This was written by a systems engineer, not a web developer. It's probably bad.
+-->
+
 <html>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<!--===================================================================================-->
+<!-- Inline style to avoid an extra round trip before the page can render. -->
 <style type="text/css">
 * {
   box-sizing: border-box;
 }
 body {
   font-family: Arial, Helvetica, sans-serif;
-  margin: 0;
-  padding: 0;
 }
 
-/* CHATLOG - kanan 70% */
 #chatlog {
   position: fixed;
   top: 0;
   bottom: 32px;
-  left: 30%;
-  right: 0;
+  left: 0;
+  right: 200px;
   overflow-y: auto;
   padding: 8px;
   overflow-wrap: break-word;
-  background: white;
 }
 #chatlog span.username {
   font-weight: bold;
@@ -31,19 +38,9 @@ body {
   height: calc(100vh - 32px - 5em);
 }
 
-/* ROSTER - kiri 30% */
 #roster {
-  position: fixed;
-  left: 0;
-  top: 0;
-  bottom: 32px;
-  width: 30%;
-  border-right: 1px solid #ccc;
   font-weight: bold;
   padding: 8px;
-  overflow-y: auto;
-  background: #f9f9f9;
-  height: calc(100vh - 32px);
 }
 
 p {
@@ -54,46 +51,51 @@ p:last-of-type {
   margin: 0;
 }
 
+#roster {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 32px;
+  width: 200px;
+  border-left: none;
+}
+
 ::-webkit-scrollbar {
   display: none;
 }
 
-/* CHAT INPUT */
-#chat-input {
-  position: fixed;
-  width: 70%;
-  height: 32px;
-  bottom: 0;
-  right: 0;
-  left: auto;
-  border: none;
-  border-top: 1px solid #ccc;
-  border-left: 1px solid #ccc;
-  padding-left: 32px;
-  outline: none;
-  background: white;
+@media(max-width:600px) {
+  #roster { display: none; }
+  #chatlog { right: 0; }
 }
 
+#chat-input {
+  position: fixed;
+  width: 100%;
+  height: 32px;
+  bottom: 0;
+  left: 0;
+  border: none;
+  border-top: none;
+  padding-left: 32px;
+  outline: none;
+}
 #chatroom::before {
   z-index: 1;
   display: block;
-  content: "➤";
+  content: ">";
   position: fixed;
   bottom: 0;
-  right: calc(70% - 32px);
-  left: auto;
+  left: 0;
   width: 32px;
   height: 32px;
   line-height: 32px;
   text-align: center;
   font-weight: bold;
   color: #888;
-  background: white;
-  border-top: 1px solid #ccc;
-  border-right: 1px solid #ccc;
+  -webkit-text-stroke-width: 2px;
 }
 
-/* NAME FORM - z-index lebih tinggi */
 #name-form {
   position: fixed;
   z-index: 3;
@@ -102,14 +104,13 @@ p:last-of-type {
   left: 0;
   right: 0;
   background-color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
 }
 
 #name-input {
+  position: fixed;
   font-size: 200%;
+  top: calc(50% - 1em);
+  left: calc(50% - 8em);
   width: 16em;
   height: 2em;
   margin: 0;
@@ -118,11 +119,12 @@ p:last-of-type {
 }
 
 #name-form p {
-  margin-top: 20px;
+  position: fixed;
+  top: calc(50% + 3em);
+  width: 100%;
   text-align: center;
 }
 
-/* ROOM FORM - z-index lebih rendah */
 #room-form {
   position: fixed;
   z-index: 2;
@@ -132,10 +134,8 @@ p:last-of-type {
   right: 0;
   background-color: white;
   font-size: 200%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  margin-top: calc(50vh - 3em);
+  text-align: center;
 }
 
 #room-name {
@@ -153,28 +153,6 @@ p:last-of-type {
   height: 2em;
 }
 
-/* SMARTPHONE STYLES */
-@media(max-width:600px) {
-  #roster {
-    display: block;
-    width: 100%;
-    left: 0;
-    right: 0;
-    border-right: none;
-    bottom: 0;
-    height: 100vh;
-  }
-  #chatlog {
-    display: none;
-  }
-  #chat-input {
-    display: none;
-  }
-  #chatroom::before {
-    display: none;
-  }
-}
-
 @media(max-width:660px) {
   #name-input, #room-form { font-size: 150%; }
   #name-form p { font-size: 75%; }
@@ -190,32 +168,36 @@ p:last-of-type {
 #go-private {
   width: 20em;
 }
+
 </style>
-</head>
-<body>
-  <!-- NAME FORM (PERTAMA) -->
-  <form id="name-form" action="/fake-form-action">
-    <input id="name-input" placeholder="your name">
-    <p>This chat runs entirely on the edge, powered by<br>
-      <a href="https://blog.cloudflare.com/introducing-workers-durable-objects" target="_blank">Cloudflare Workers Durable Objects</a></p>
-  </form>
 
-  <!-- ROOM FORM (KEDUA) -->
-  <form id="room-form" action="/fake-form-action">
-    <p>Enter a public room:</p>
-    <input id="room-name" placeholder="room name"><button id="go-public">Go &raquo;</button>
-    <p>OR</p>
-    <button id="go-private">Create a Private Room &raquo;</button>
-  </form>
+<!--===================================================================================-->
+<!-- The actual HTML. There is not much of it. -->
 
-  <!-- CHATROOM -->
-  <form id="chatroom" action="/fake-form-action">
-    <div id="chatlog">
-      <div id="spacer"></div>
-    </div>
-    <div id="roster"></div>
-    <input id="chat-input">
-  </form>
+  </head>
+  <body>
+    <form id="name-form" action="/fake-form-action">
+      <input id="name-input" placeholder="your name">
+      <p>This chat runs entirely on the edge, powered by<br>
+        <a href="https://blog.cloudflare.com/introducing-workers-durable-objects" target="_blank">Cloudflare Workers Durable Objects</a></p>
+    </form>
+    <form id="room-form" action="/fake-form-action">
+      <p>Enter a public room:</p>
+      <input id="room-name" placeholder="room name"><button id="go-public">Go &raquo;</button>
+      <p>OR</p>
+      <button id="go-private">Create a Private Room &raquo;</button>
+    </form>
+    <form id="chatroom" action="/fake-form-action">
+      <div id="chatlog">
+        <div id="spacer"></div>
+      </div>
+      <div id="roster"></div>
+      <input id="chat-input">
+    </form>
+  </body>
+
+<!--===================================================================================-->
+<!-- Client-side JavaScript code for the app. -->
 
 <script type="text/javascript">
 let currentWebSocket = null;
@@ -231,13 +213,16 @@ let chatlog = document.querySelector("#chatlog");
 let chatInput = document.querySelector("#chat-input");
 let roster = document.querySelector("#roster");
 
+// Is the chatlog scrolled to the bottom?
 let isAtBottom = true;
+
 let username;
 let roomname;
 
 let hostname = window.location.host;
 if (hostname == "") {
-  hostname = "edge.app-readtalk.workers.dev";
+  // Probably testing the HTML locally.
+  hostname = "edge-chat-demo.cloudflareworkers.com";
 }
 
 function startNameChooser() {
@@ -259,8 +244,7 @@ function startNameChooser() {
 }
 
 function startRoomChooser() {
-  nameForm.style.display = "none";
-  roomForm.style.display = "flex";
+  nameForm.remove();
 
   if (document.location.hash.length > 1) {
     roomname = document.location.hash.slice(1);
@@ -309,8 +293,9 @@ function startRoomChooser() {
 }
 
 function startChat() {
-  roomForm.style.display = "none";
+  roomForm.remove();
 
+  // Normalize the room name a bit.
   roomname = roomname.replace(/[^a-zA-Z0-9_-]/g, "").replace(/_/g, "-").toLowerCase();
 
   if (roomname.length > 32 && !roomname.match(/^[0-9a-f]{64}$/)) {
@@ -320,20 +305,18 @@ function startChat() {
 
   document.location.hash = "#" + roomname;
 
-  if (window.innerWidth <= 600) {
-    roster.style.display = "block";
-    chatlog.style.display = "none";
-    chatInput.style.display = "none";
-  }
-
   chatInput.addEventListener("keydown", event => {
     if (event.keyCode == 38) {
+      // up arrow
       chatlog.scrollBy(0, -50);
     } else if (event.keyCode == 40) {
+      // down arrow
       chatlog.scrollBy(0, 50);
     } else if (event.keyCode == 33) {
+      // page up
       chatlog.scrollBy(0, -chatlog.clientHeight + 50);
     } else if (event.keyCode == 34) {
+      // page down
       chatlog.scrollBy(0, chatlog.clientHeight - 50);
     }
   });
@@ -344,6 +327,8 @@ function startChat() {
     if (currentWebSocket) {
       currentWebSocket.send(JSON.stringify({message: chatInput.value}));
       chatInput.value = "";
+
+      // Scroll to bottom whenever sending a message.
       chatlog.scrollBy(0, 1e8);
     }
   });
@@ -358,6 +343,16 @@ function startChat() {
     isAtBottom = chatlog.scrollTop + chatlog.clientHeight >= chatlog.scrollHeight;
   });
 
+  chatInput.focus();
+  document.body.addEventListener("click", event => {
+    // If the user clicked somewhere in the window without selecting any text, focus the chat
+    // input.
+    if (window.getSelection().toString() == "") {
+      chatInput.focus();
+    }
+  });
+
+  // Detect mobile keyboard appearing and disappearing, and adjust the scroll as appropriate.
   if('visualViewport' in window) {
     window.visualViewport.addEventListener('resize', function(event) {
       if (isAtBottom) {
@@ -373,6 +368,7 @@ let lastSeenTimestamp = 0;
 let wroteWelcomeMessages = false;
 
 function join() {
+  // If we are running via wrangler dev, use ws:
   const wss = document.location.protocol === "http:" ? "ws://" : "wss://";
   let ws = new WebSocket(wss + hostname + "/api/room/" + roomname + "/websocket");
   let rejoined = false;
@@ -383,21 +379,27 @@ function join() {
       rejoined = true;
       currentWebSocket = null;
 
+      // Clear the roster.
       while (roster.firstChild) {
         roster.removeChild(roster.firstChild);
       }
 
+      // Don't try to reconnect too rapidly.
       let timeSinceLastJoin = Date.now() - startTime;
       if (timeSinceLastJoin < 10000) {
+        // Less than 10 seconds elapsed since last join. Pause a bit.
         await new Promise(resolve => setTimeout(resolve, 10000 - timeSinceLastJoin));
       }
 
+      // OK, reconnect now!
       join();
     }
   }
 
   ws.addEventListener("open", event => {
     currentWebSocket = ws;
+
+    // Send user info message.
     ws.send(JSON.stringify({name: username}));
   });
 
@@ -418,17 +420,26 @@ function join() {
         }
       }
     } else if (data.ready) {
+      // All pre-join messages have been delivered.
       if (!wroteWelcomeMessages) {
         wroteWelcomeMessages = true;
-        addChatMessage(null, "* This is a demo app built with Cloudflare Workers Durable Objects.");
-        addChatMessage(null, "* WARNING: Participants are random people on the internet. Names are not authenticated.");
+        addChatMessage(null,
+            "* This is a demo app built with Cloudflare Workers Durable Objects. The source code " +
+            "can be found at: https://github.com/cloudflare/workers-chat-demo");
+        addChatMessage(null,
+            "* WARNING: Participants in this chat are random people on the internet. " +
+            "Names are not authenticated; anyone can pretend to be anyone. The people " +
+            "you are chatting with are NOT Cloudflare employees. Chat history is saved.");
         if (roomname.length == 64) {
-          addChatMessage(null, "* This is a private room. Share the URL to invite others.");
+          addChatMessage(null,
+              "* This is a private room. You can invite someone to the room by sending them the URL.");
         } else {
-          addChatMessage(null, "* Welcome to #" + roomname + ". Say hi!");
+          addChatMessage(null,
+              "* Welcome to #" + roomname + ". Say hi!");
         }
       }
     } else {
+      // A regular chat message.
       if (data.timestamp > lastSeenTimestamp) {
         addChatMessage(data.name, data.message);
         lastSeenTimestamp = data.timestamp;
@@ -456,6 +467,9 @@ function addChatMessage(name, text) {
   }
   p.appendChild(document.createTextNode(text));
 
+  // Append the new chat line, making sure that if the chatlog was scrolled to the bottom
+  // before, it remains scrolled to the bottom, and otherwise the scroll position doesn't
+  // change.
   chatlog.appendChild(p);
   if (isAtBottom) {
     chatlog.scrollBy(0, 1e8);
@@ -464,4 +478,5 @@ function addChatMessage(name, text) {
 
 startNameChooser();
 </script>
+<!--===================================================================================-->
 </html>
