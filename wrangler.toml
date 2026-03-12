@@ -5,8 +5,8 @@ main = "src/global.mjs"
 
 [durable_objects]
 bindings = [
-  { name = "rooms", class_name = "ChatRoom" },
-  { name = "limiters", class_name = "RateLimiter" },
+  { name = "rooms", class_name = "edge_ChatRoom" },
+  { name = "limiters", class_name = "edge_RateLimiter" },
 ]
 [[d1_databases]]
 binding = "EDGE_DB"  # ← harus sama dengan "EDGE_DB"
@@ -41,4 +41,4 @@ fallthrough = false
 
 [[migrations]]
 tag = "v1"                                       
-new_sqlite_classes = ["ChatRoom", "RateLimiter"]
+new_sqlite_classes = ["edge_ChatRoom", "edge_RateLimiter"]
