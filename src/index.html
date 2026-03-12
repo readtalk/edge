@@ -93,7 +93,7 @@ p:last-of-type {
   border-right: 1px solid #ccc;
 }
 
-/* NAME FORM - Z-INDEX LEBIH TINGGI (HARUS PERTAMA) */
+/* NAME FORM (Z-INDEX LEBIH TINGGI) */
 #name-form {
   position: fixed;
   z-index: 3;
@@ -122,7 +122,7 @@ p:last-of-type {
   text-align: center;
 }
 
-/* ROOM FORM - Z-INDEX LEBIH RENDAH */
+/* ROOM FORM (Z-INDEX RENDAH) */
 #room-form {
   position: fixed;
   z-index: 2;
@@ -206,14 +206,14 @@ p:last-of-type {
 </style>
 </head>
 <body>
-  <!-- NAME FORM (PERTAMA, Z-INDEX 3) -->
+  <!-- NAME FORM (PERTAMA) -->
   <form id="name-form" action="/fake-form-action">
     <input id="name-input" placeholder="your name">
-    <p>This chat runs entirely on the edge, powered by<br>
-      <a href="https://blog.cloudflare.com/introducing-workers-durable-objects" target="_blank">Cloudflare Workers Durable Objects</a></p>
+    <p>This chat runs entirely on the edge<br>
+      <a href="https://app-readtalk.pages.dev/" target="_blank">READTalk App</a></p>
   </form>
 
-  <!-- ROOM FORM (KEDUA, Z-INDEX 2) -->
+  <!-- ROOM FORM (KEDUA) -->
   <form id="room-form" action="/fake-form-action">
     <p>Enter a public room:</p>
     <input id="room-name" placeholder="room name"><button id="go-public">Go &raquo;</button>
@@ -221,7 +221,7 @@ p:last-of-type {
     <button id="go-private">Create a Private Room &raquo;</button>
   </form>
 
-  <!-- CHATROOM (KETIGA) -->
+  <!-- CHATROOM -->
   <form id="chatroom" action="/fake-form-action">
     <div id="chatlog">
       <div id="spacer"></div>
@@ -269,16 +269,15 @@ if (hostname == "") {
   hostname = "edge.app-readtalk.workers.dev";
 }
 
+// FUNGSI D1/KV (JALAN DI BACKGROUND, TIDAK MENGGANGGU)
 async function loadPublicRooms() {
   try {
     let response = await fetch(`https://${hostname}/api/rooms`);
     let rooms = await response.json();
-    console.log('Public rooms from D1:', rooms);
     document.getElementById('d1-count').textContent = rooms.length;
     
     let cached = await fetch(`https://${hostname}/api/cache`);
     let cacheData = await cached.json();
-    console.log('Cached rooms from KV:', cacheData);
     document.getElementById('kv-count').textContent = cacheData.length;
   } catch (err) {
     console.error('Failed to load rooms:', err);
@@ -320,7 +319,7 @@ async function cachePublicRooms() {
   }
 }
 
-// ===== START NAME CHOOSER (SAMA PERSIS ORIGINAL) =====
+// ===== BACKEND SAMA PERSIS DENGAN ORIGINAL =====
 function startNameChooser() {
   nameForm.addEventListener("submit", event => {
     event.preventDefault();
@@ -486,11 +485,9 @@ function join() {
 
   ws.addEventListener("open", event => {
     currentWebSocket = ws;
-    
-    // ✅ KIRIM NAME KARENA USERNAME UDAH ADA (dari form sebelumnya)
-    if (username) {
-      ws.send(JSON.stringify({name: username}));
-    }
+
+    // ✅ SAMA PERSIS ORIGINAL: KIRIM NAME (username sudah ada dari form sebelumnya)
+    ws.send(JSON.stringify({name: username}));
   });
 
   ws.addEventListener("message", event => {
@@ -499,7 +496,7 @@ function join() {
     if (data.error) {
       addChatMessage(null, "* Error: " + data.error);
     } else if (data.joined) {
-      // ✅ LANGSUNG APPEND KE ROSTER
+      // ✅ LANGSUNG APPEND, TANPA pendingParticipants
       let p = document.createElement("p");
       p.innerText = data.joined;
       roster.appendChild(p);
@@ -557,6 +554,8 @@ function addChatMessage(name, text) {
 
 // ✅ MULAI DARI NAME FORM (SAMA PERSIS ORIGINAL)
 startNameChooser();
-loadPublicRooms();
+
+// ✅ FUNGSI D1/KV JALAN DI BACKGROUND, TIDAK MENGGANGGU
+loadPublicRooms().catch(err => console.log('Room load failed:', err));
 </script>
 </html>
