@@ -93,8 +93,8 @@ p:last-of-type {
   border-right: 1px solid #ccc;
 }
 
-/* ROOM FORM */
-#room-form {
+/* NAME FORM - Z-INDEX LEBIH TINGGI (HARUS PERTAMA) */
+#name-form {
   position: fixed;
   z-index: 3;
   top: 0;
@@ -102,10 +102,40 @@ p:last-of-type {
   left: 0;
   right: 0;
   background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#name-input {
   font-size: 200%;
+  width: 16em;
+  height: 2em;
+  margin: 0;
   text-align: center;
-  padding-top: calc(50vh - 3em);
-  box-sizing: border-box;
+  border: 1px solid #bbb;
+}
+
+#name-form p {
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* ROOM FORM - Z-INDEX LEBIH RENDAH */
+#room-form {
+  position: fixed;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+  font-size: 200%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 #room-name {
@@ -121,37 +151,6 @@ p:last-of-type {
   border: 1px solid #bbb;
   background-color: #eee;
   height: 2em;
-}
-
-/* NAME FORM */
-#name-form {
-  position: fixed;
-  z-index: 2;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: white;
-  display: none;
-}
-
-#name-input {
-  position: fixed;
-  font-size: 200%;
-  top: calc(50% - 1em);
-  left: calc(50% - 8em);
-  width: 16em;
-  height: 2em;
-  margin: 0;
-  text-align: center;
-  border: 1px solid #bbb;
-}
-
-#name-form p {
-  position: fixed;
-  top: calc(50% + 3em);
-  width: 100%;
-  text-align: center;
 }
 
 /* SMARTPHONE STYLES */
@@ -207,19 +206,22 @@ p:last-of-type {
 </style>
 </head>
 <body>
-  <form id="room-form" action="/fake-form-action">
-    <p>Public Room:</p>
-    <input id="room-name" placeholder="room name"><button id="go-public">Go &raquo;</button>
-    <p>OR</p>
-    <button id="go-private">Private Room &raquo;</button>
-  </form>
-
+  <!-- NAME FORM (PERTAMA, Z-INDEX 3) -->
   <form id="name-form" action="/fake-form-action">
     <input id="name-input" placeholder="your name">
-    <p>This chat runs entirely on the edge<br>
-      <a href="https://app-readtalk.pages.dev/" target="_blank">READTalk App</a></p>
+    <p>This chat runs entirely on the edge, powered by<br>
+      <a href="https://blog.cloudflare.com/introducing-workers-durable-objects" target="_blank">Cloudflare Workers Durable Objects</a></p>
   </form>
 
+  <!-- ROOM FORM (KEDUA, Z-INDEX 2) -->
+  <form id="room-form" action="/fake-form-action">
+    <p>Enter a public room:</p>
+    <input id="room-name" placeholder="room name"><button id="go-public">Go &raquo;</button>
+    <p>OR</p>
+    <button id="go-private">Create a Private Room &raquo;</button>
+  </form>
+
+  <!-- CHATROOM (KETIGA) -->
   <form id="chatroom" action="/fake-form-action">
     <div id="chatlog">
       <div id="spacer"></div>
@@ -254,9 +256,6 @@ let isAtBottom = true;
 let username;
 let roomname;
 let deviceId = localStorage.getItem('device_id');
-
-// HAPUS pendingParticipants!
-// let pendingParticipants = [];
 
 if (!deviceId) {
   deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
@@ -321,7 +320,29 @@ async function cachePublicRooms() {
   }
 }
 
+// ===== START NAME CHOOSER (SAMA PERSIS ORIGINAL) =====
+function startNameChooser() {
+  nameForm.addEventListener("submit", event => {
+    event.preventDefault();
+    username = nameInput.value;
+    if (username.length > 0) {
+      startRoomChooser();
+    }
+  });
+
+  nameInput.addEventListener("input", event => {
+    if (event.currentTarget.value.length > 32) {
+      event.currentTarget.value = event.currentTarget.value.slice(0, 32);
+    }
+  });
+
+  nameInput.focus();
+}
+
 function startRoomChooser() {
+  nameForm.style.display = "none";
+  roomForm.style.display = "flex";
+
   if (document.location.hash.length > 1) {
     roomname = document.location.hash.slice(1);
     saveRoomToD1(roomname, false);
@@ -377,7 +398,6 @@ function startRoomChooser() {
 
 function startChat() {
   roomForm.style.display = "none";
-  nameForm.style.display = "block";
 
   roomname = roomname.replace(/[^a-zA-Z0-9_-]/g, "").replace(/_/g, "-").toLowerCase();
 
@@ -435,48 +455,6 @@ function startChat() {
   }
 
   join();
-
-  nameForm.addEventListener("submit", event => {
-    event.preventDefault();
-    username = nameInput.value;
-    if (username.length > 0) {
-      localStorage.setItem('username', username);
-      
-      // ✅ KIRIM NAME KE WEBSOCKET
-      if (currentWebSocket && currentWebSocket.readyState === WebSocket.OPEN) {
-        currentWebSocket.send(JSON.stringify({name: username}));
-      }
-          
-      nameForm.style.display = "none";
-      
-      // ❌ HAPUS BLOK pendingParticipants
-      // pendingParticipants.forEach(participant => {
-      //   let p = document.createElement("p");
-      //   p.innerText = participant;
-      //   roster.appendChild(p);
-      // });
-      // pendingParticipants = [];
-      
-      if (window.innerWidth <= 600) {
-        chatInput.style.display = "none";
-      } else {
-        roster.style.display = "block";
-        chatlog.style.display = "block";
-        chatInput.style.display = "block";
-        chatInput.focus();
-      }
-    }
-  });
-
-  nameInput.addEventListener("input", event => {
-    if (event.currentTarget.value.length > 32) {
-      event.currentTarget.value = event.currentTarget.value.slice(0, 32);
-    }
-  });
-  
-  document.getElementById('close-settings').addEventListener('click', function() {
-    document.getElementById('settings-modal').style.display = 'none';
-  });
 }
 
 let lastSeenTimestamp = 0;
@@ -506,22 +484,22 @@ function join() {
     }
   }
 
-  // ✅ SAMA PERSIS FILE 1: KIRIM NAME KALAU SUDAH ADA
   ws.addEventListener("open", event => {
     currentWebSocket = ws;
+    
+    // ✅ KIRIM NAME KARENA USERNAME UDAH ADA (dari form sebelumnya)
     if (username) {
       ws.send(JSON.stringify({name: username}));
     }
   });
 
-  // ✅ SAMA PERSIS FILE 1: MESSAGE HANDLER LANGSUNG
   ws.addEventListener("message", event => {
     let data = JSON.parse(event.data);
 
     if (data.error) {
       addChatMessage(null, "* Error: " + data.error);
     } else if (data.joined) {
-      // ✅ LANGSUNG APPEND, TANPA pendingParticipants!
+      // ✅ LANGSUNG APPEND KE ROSTER
       let p = document.createElement("p");
       p.innerText = data.joined;
       roster.appendChild(p);
@@ -577,7 +555,8 @@ function addChatMessage(name, text) {
   }
 }
 
+// ✅ MULAI DARI NAME FORM (SAMA PERSIS ORIGINAL)
+startNameChooser();
 loadPublicRooms();
-startRoomChooser();
 </script>
 </html>
