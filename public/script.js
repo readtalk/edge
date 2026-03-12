@@ -39,8 +39,8 @@ function startNameChooser() {
 }
 
 function startRoomChooser() {
-  nameForm.style.display = "none";  // ✅ SEMBUNYIKAN, bukan remove()
-  roomForm.style.display = "flex";
+  // ✅ UBAH: remove() jadi style.display
+  nameForm.style.display = "none";
 
   if (document.location.hash.length > 1) {
     roomname = document.location.hash.slice(1);
@@ -89,7 +89,8 @@ function startRoomChooser() {
 }
 
 function startChat() {
-  roomForm.style.display = "none";  // ✅ SEMBUNYIKAN, bukan remove()
+  // ✅ UBAH: remove() jadi style.display
+  roomForm.style.display = "none";
 
   roomname = roomname.replace(/[^a-zA-Z0-9_-]/g, "").replace(/_/g, "-").toLowerCase();
 
