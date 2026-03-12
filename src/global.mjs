@@ -1,4 +1,4 @@
-import HTML from "./index.html";
+import HTML from "./public/index.html";
 
 async function handleErrors(request, func) {
   try {
